@@ -25,7 +25,8 @@ ui/dist-ssr
 
 */cypress/videos/
 */cypress/screenshots/
-
+*auto-imports.d.ts
+*components.d.ts
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

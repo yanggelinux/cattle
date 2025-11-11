@@ -26,14 +26,14 @@ function genRouter() {
     //开发环境
     //import.meta.env.VITE_APP_BASE_API
     return createRouter({
-      history: createWebHashHistory('/cattlenew/'),
+      history: createWebHashHistory('/'),
       routes: constantRoutes,
       // 刷新时，滚动条位置还原
       scrollBehavior: () => ({ left: 0, top: 0 }),
     })
   } else {
     return createRouter({
-      history: createWebHistory('/cattlenew/'),
+      history: createWebHistory('/'),
       routes: constantRoutes,
       // 刷新时，滚动条位置还原
       scrollBehavior: () => ({ left: 0, top: 0 }),

@@ -14,10 +14,10 @@ JWT:
   JwtExpire: 828000
   JwtIssuer: cattle
 MySQL:
-  Host: mysql_host
-  Username: mysql_user
-  Password: mysql_password
-  Port: mysql_port
+  Host: 59.110.11.17
+  Username: test_user
+  Password: Test_123
+  Port: 7829
   DBName: cattle
   MaxIdleConns: 10 #空闲连接池中连接的最大数量
   MaxOpenConns: 100 #打开数据库连接的最大数量

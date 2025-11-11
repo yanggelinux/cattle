@@ -60,7 +60,7 @@
       </div>
     </div>
     <div class="login-footer">
-      <span>Copyright © 2025 金保信运维团队技术支持</span>
+      <span>Copyright © 2025 技术支持</span>
     </div>
   </div>
 </template>
@@ -72,7 +72,6 @@ import type { FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/store'
 import { computed, nextTick, ref } from 'vue'
-import { encryptPassword } from '@/utils/crypto.ts'
 
 const authStore = useAuthStore()
 
@@ -120,11 +119,11 @@ function handleLoginSubmit() {
       if (!password) {
         return
       }
-      const { iv, cipher } = await encryptPassword(password)
-      const ePassowrd = `${iv}@${cipher}`
+      // const { iv, cipher } = await encryptPassword(password)
+      // const ePassowrd = `${iv}@${cipher}`
       const loginData: LoginFormData = {
         userName: userName,
-        password: ePassowrd,
+        password: password,
       }
       await authStore.login(loginData)
       await nextTick()

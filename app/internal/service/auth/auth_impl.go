@@ -13,7 +13,6 @@ import (
 	rolerepo "github.com/yanggelinux/cattle/internal/repository/role"
 	userrepo "github.com/yanggelinux/cattle/internal/repository/user"
 	"github.com/yanggelinux/cattle/internal/service/user"
-	"github.com/yanggelinux/cattle/pkg/util"
 	"strings"
 	"time"
 )
@@ -40,36 +39,14 @@ func (s *authService) Login(ctx context.Context, req *request.LoginReq) (*result
 	var userID int64
 	resultData := &result.LoginResult{}
 	userName := *req.UserName
-	var iv, cipher string
 	//获取一个认证加密的信息
-	authorization := *req.Password
-	resultData.Authorization = authorization
-	ePasswords := strings.Split(*req.Password, "@")
-	if len(ePasswords) == 2 {
-		iv = ePasswords[0]
-		cipher = ePasswords[1]
-	}
-	password, err := util.DecryptPassword(iv, cipher)
-	if err != nil {
-		return resultData, errors.WithCodeError(ce.ErrorLoginFailed.Code(), err)
-	}
+	password := *req.Password
 	// 现从系统用户查询，查询不到再ldap认证
 	sysUser, err := s.userRepo.GetBySysName(ctx, userName)
 	if err != nil {
 		return resultData, errors.WithCodeError(ce.ErrorLoginUserPasswordEmpty.Code(), err)
 	}
-
-	var uiv, ucipher string
-	uPasswords := strings.Split(sysUser.Password, "@")
-	if len(uPasswords) == 2 {
-		uiv = uPasswords[0]
-		ucipher = uPasswords[1]
-	}
-	dPassword, err := util.DecryptPassword(uiv, ucipher)
-	if err != nil {
-		return resultData, errors.WithCodeError(ce.ErrorLoginFailed.Code(), err)
-	}
-	if !(password == sysUser.Password || password == dPassword) {
+	if password != sysUser.Password {
 		err := errors.WithCodeError(ce.ErrorLoginUserFailed.Code(), err)
 		return nil, err
 	}
@@ -102,84 +79,6 @@ func (s *authService) Login(ctx context.Context, req *request.LoginReq) (*result
 	resultData.Token = token
 	resultData.RolePermResult = rolePermResult
 	resultData.Project = "cattle"
-	return resultData, nil
-}
-
-// openapi 调用 其它用户登录
-func (s *authService) LoginByAuthorize(ctx context.Context, req *request.LoginByAuthorizeReq) (*result.LoginResult, error) {
-
-	var userID int64
-	resultData := &result.LoginResult{}
-	userName := *req.UserName
-	var iv, cipher string
-	//获取一个认证加密的信息
-	authorization := *req.Authorization
-	resultData.Authorization = authorization
-	// 对请求过来的认证信息进行解密
-	ePasswords := strings.Split(*req.Authorization, "@")
-	if len(ePasswords) == 2 {
-		iv = ePasswords[0]
-		cipher = ePasswords[1]
-	}
-	password, err := util.DecryptPassword(iv, cipher)
-	if err != nil {
-		return resultData, errors.WithCodeError(ce.ErrorLoginFailed.Code(), err)
-	}
-	sysUser, err := s.userRepo.GetByName(ctx, userName)
-	if err != nil {
-		return resultData, errors.WithCodeError(ce.ErrorLoginFailed.Code(), err)
-	}
-
-	// 对数据库中的用户密码进行解密
-	var uiv, ucipher string
-	uPasswords := strings.Split(sysUser.Password, "@")
-	if len(uPasswords) == 2 {
-		uiv = uPasswords[0]
-		ucipher = uPasswords[1]
-	}
-	dPassword, err := util.DecryptPassword(uiv, ucipher)
-	if err != nil {
-		return resultData, errors.WithCodeError(ce.ErrorLoginFailed.Code(), err)
-	}
-	// 解密后的两个密码进行 对比
-	if !(password == dPassword) {
-		err := errors.WithCodeError(ce.ErrorLoginUserFailed.Code(), err)
-		return nil, err
-	}
-	userID = sysUser.ID
-	resultData.UserID = sysUser.ID
-	resultData.UserName = userName
-	resultData.DisplayName = sysUser.DisplayName
-	resultData.Email = sysUser.Email
-	resultData.DeptName = sysUser.DeptName
-	sysUser.LastLoginTime = time.Now()
-
-	// 生成token信息
-	token, err := app.GenerateToken(global.JWTSetting.JwtSecret, global.JWTSetting.JwtIssuer, userID)
-	if err != nil {
-		err := errors.WithCodeError(ce.ErrorAuthToken.Code(), err)
-		return nil, err
-	}
-	rolePermResult, err := s.GetRolesPerms(ctx, userID)
-	if err != nil {
-		err := errors.WithCodeError(ce.ErrorLoginFailed.Code(), err)
-		return nil, err
-	}
-	resultData.Token = token
-	resultData.RolePermResult = rolePermResult
-	return resultData, nil
-}
-
-// 根据用户获取认证信息
-func (s *authService) GetAuthorization(ctx context.Context, req *request.GetAuthorizationReq) (*result.AuthorizationResult, error) {
-	userName := *req.UserName
-	record, err := s.userRepo.GetByName(ctx, userName)
-	if err != nil {
-		err := errors.WithCodeError(ce.ErrorGetAuthor.Code(), err)
-		return nil, err
-	}
-	resultData := &result.AuthorizationResult{}
-	resultData.Authorization = record.Password
 	return resultData, nil
 }
 

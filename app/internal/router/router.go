@@ -35,8 +35,8 @@ func NewRouter() *gin.Engine {
 	orderField := apiV1.NewOrderField()
 	team := apiV1.NewTeam()
 	// 配置路由
-	apiPublic := r.Group("/cattlenew/api/v1")
-	apiGroup := r.Group("/cattlenew/api/v1")
+	apiPublic := r.Group("/cattle/api/v1")
+	apiGroup := r.Group("/cattle/api/v1")
 
 	// openapi
 	openAuth := openapiV1.NewAuth()
@@ -160,9 +160,7 @@ func NewRouter() *gin.Engine {
 	}
 	// open api
 	{
-		openapiPublicGroup.POST("/auth/login", openAuth.Login)
 		openapiPublicGroup.GET("/auth/token", openAuth.GetToken)
-		openapiPublicGroup.GET("/auth/authorization", openAuth.GetAuthorization)
 
 	}
 	return r

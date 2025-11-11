@@ -17,19 +17,6 @@ func NewAuth() *Auth {
 	return &Auth{}
 }
 
-func (a *Auth) Login(c *gin.Context) {
-	data := &result.EmptyResult{}
-	req := &request.LoginByAuthorizeReq{}
-	err := c.ShouldBindJSON(req)
-	if err != nil {
-		app.Response(c, data, errors.WithCode(ce.ErrorInvaildParams.Code(), "参数验证失败", err))
-		return
-	}
-	svc := auth.NewAuthService()
-	authResult, err := svc.LoginByAuthorize(c, req)
-	app.Response(c, authResult, err)
-}
-
 func (a *Auth) GetToken(c *gin.Context) {
 	data := &result.EmptyResult{}
 	req := &request.GetTokenReq{}
@@ -40,18 +27,5 @@ func (a *Auth) GetToken(c *gin.Context) {
 	}
 	svc := auth.NewAuthService()
 	authResult, err := svc.GetToken(c, req)
-	app.Response(c, authResult, err)
-}
-
-func (a *Auth) GetAuthorization(c *gin.Context) {
-	data := &result.EmptyResult{}
-	req := &request.GetAuthorizationReq{}
-	err := c.ShouldBindQuery(req)
-	if err != nil {
-		app.Response(c, data, errors.WithCode(ce.ErrorInvaildParams.Code(), "参数验证失败", err))
-		return
-	}
-	svc := auth.NewAuthService()
-	authResult, err := svc.GetAuthorization(c, req)
 	app.Response(c, authResult, err)
 }

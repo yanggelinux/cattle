@@ -122,7 +122,6 @@ import { type AxiosResponse } from 'axios'
 import { useUserStore } from '@/store/modules/user'
 import UserOpt from './components/UserOpt.vue'
 import { userOriginMapping } from '@/utils/constant'
-import { decryptPassword } from '@/utils/crypto.ts'
 
 import { indexMethod } from '@/utils/view'
 
@@ -221,17 +220,17 @@ async function handleOpenDialog(opt: string, rowData?: UserResult) {
   if (opt === 'update') {
     dialog.title = '编辑用户'
     Object.assign(formData, rowData)
-    const ePassword = rowData?.password
-    if (ePassword) {
-      const ePasswords = ePassword.split('@')
-      let password = ''
-      if (ePasswords.length == 2) {
-        const iv = ePasswords[0]
-        const cipher = ePasswords[1]
-        password = await decryptPassword(iv, cipher)
-      }
-      formData.password = password
-    }
+    // const ePassword = rowData?.password
+    // if (ePassword) {
+    //   const ePasswords = ePassword.split('@')
+    //   let password = ''
+    //   if (ePasswords.length == 2) {
+    //     const iv = ePasswords[0]
+    //     const cipher = ePasswords[1]
+    //     password = await decryptPassword(iv, cipher)
+    //   }
+    //   formData.password = password
+    // }
   } else {
     dialog.title = '新增用户'
   }

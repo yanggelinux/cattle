@@ -19,7 +19,7 @@ function genBaseUrl(): string {
     baseURL = import.meta.env.VITE_APP_BASE_API
   } else {
     const { protocol, host } = document.location
-    const url: string = `${protocol}//${host}/cattlenew`
+    const url: string = `${protocol}//${host}/cattle`
     baseURL = url
   }
   return baseURL
