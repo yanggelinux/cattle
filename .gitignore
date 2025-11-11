@@ -3,8 +3,8 @@
 *cmd/eaglenwew/__debug_bin
 *vendor/
 .idea
-*cmd/bin
-*configs/config.yaml
+app/cmd/bin
+app/configs/config.yaml
 .vscode/
 
 # Logs
