@@ -2,6 +2,7 @@ package archgraph
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/yanggelinux/cattle/common/errors"
 	"github.com/yanggelinux/cattle/internal/dto/request"
 	"github.com/yanggelinux/cattle/internal/dto/result"
@@ -463,4 +464,214 @@ func (s *archGraphService) DeleteReview(ctx context.Context, id int64) error {
 		return errors.WithCodeError(ce.ErrorDBOperateFailed.Code(), err)
 	}
 	return nil
+}
+
+// open api
+type ArchGraphNode struct {
+	//架构节点ID
+	ID string
+	// 前一节点ID列表
+	NextNodeIDs []string
+	// 后一节点ID列表
+	PrevNodeIDs []string
+	// 前一边ID列表
+	NextEdgeIDs []string
+	// 后一边ID列表
+	PrevEdgeIDs []string
+	// 关联图ID
+	GraphID int64
+}
+
+func (s *archGraphService) GetDataByLabel(ctx context.Context, req *request.GetArchGraphDataReq) (*result.ArchGraphData, error) {
+
+	graphLabel := *req.GraphLabel
+	record, err := s.archGraphRepo.GetByLabel(ctx, graphLabel)
+	if err != nil {
+		return nil, errors.WithCodeError(ce.ErrorDBQueryNotFound.Code(), err)
+	}
+	nodeData := record.NodeData
+	edgeData := record.EdgeData
+	nodes := make([]*Node, 0, 0)
+	err = json.Unmarshal(nodeData, &nodes)
+	if err != nil {
+		return nil, errors.WithCodeError(ce.ErrorDBQueryFailed.Code(), err)
+	}
+	edges := make([]*Edge, 0, 0)
+	err = json.Unmarshal(edgeData, &edges)
+	if err != nil {
+		return nil, errors.WithCodeError(ce.ErrorDBQueryFailed.Code(), err)
+	}
+	nodeInfos := make([]*result.NodeInfo, 0, len(nodes))
+	archGraphNodes := make([]*ArchGraphNode, 0, 0)
+	for _, node := range nodes {
+		// 在这里判断 节点只有 text 而 没有 selected
+		nodeInfo := &result.NodeInfo{}
+		nodeInfo.ID = node.ID
+		nodeInfo.Type = node.Type
+		nodeInfo.Name = node.Text.Value
+		// 架构图的节点不放到节点列表
+		if node.Type == "archGraph" {
+			if node.Properties.LinkGraph == nil {
+				continue
+			}
+			graphID := node.Properties.LinkGraph.ID
+			archGraphNode := &ArchGraphNode{}
+			archGraphNode.ID = node.ID
+			archGraphNode.GraphID = graphID
+			archGraphNodes = append(archGraphNodes, archGraphNode)
+			continue
+		}
+		nodeInfos = append(nodeInfos, nodeInfo)
+	}
+	edgeInfos := make([]*result.EdgeInfo, 0, len(edges))
+	for _, edge := range edges {
+		edgeInfo := &result.EdgeInfo{}
+		edgeInfo.ID = edge.ID
+		edgeInfo.SourceID = edge.SourceNodeId
+		edgeInfo.TargetID = edge.TargetNodeId
+		// 在这里不全架构图节点的信息，并记录和架构图节点相连的边的信息
+		s.genArchGraphNodes(edge, archGraphNodes)
+		edgeInfos = append(edgeInfos, edgeInfo)
+	}
+
+	// 在这里遍历 架构图节点信息
+	archNodeInfos := make([]*result.NodeInfo, 0, 0)
+	arcEdgeInfos := make([]*result.EdgeInfo, 0, 0)
+	for _, archGraphNode := range archGraphNodes {
+		graphID := archGraphNode.GraphID
+		archNodeInfo, archEdgeInfo, err := s.genArchGraphInfo(ctx, graphID)
+		if err != nil {
+			return nil, errors.WithCodeError(ce.ErrorDBQueryFailed.Code(), err)
+		}
+		startNodes, endNodes := s.findStartAndEndNodes(archNodeInfo, archEdgeInfo)
+		if len(startNodes) != 1 || len(endNodes) != 1 {
+			return nil, errors.WithCodeError(ce.ErrorRelGraphNode.Code(), err)
+		}
+		archNodeInfos = append(archNodeInfos, archNodeInfo...)
+		arcEdgeInfos = append(arcEdgeInfos, archEdgeInfo...)
+		startNodeID := startNodes[0].ID
+		endNodeID := endNodes[0].ID
+		// 把链接架构图节点的边的 sourceID 换成 endNodeID， targetID 换成 startNodeID
+		nextEdgeIDs := archGraphNode.NextEdgeIDs
+		prevEdgeIDs := archGraphNode.PrevEdgeIDs
+		// 处理边信息,进行source 或者target 节点替换
+		s.dealEdges(edgeInfos, prevEdgeIDs, startNodeID, "target")
+		s.dealEdges(edgeInfos, nextEdgeIDs, endNodeID, "source")
+	}
+	nodeInfos = append(nodeInfos, archNodeInfos...)
+	edgeInfos = append(edgeInfos, arcEdgeInfos...)
+	resultData := &result.ArchGraphData{}
+	resultData.NodeInfos = nodeInfos
+	resultData.EdgeInfos = edgeInfos
+	return resultData, nil
+}
+
+func (s *archGraphService) dealEdges(edges []*result.EdgeInfo, edgeIDs []string, nodeID string, typ string) {
+	for _, edgeID := range edgeIDs {
+		for _, edge := range edges {
+			if edge.ID == edgeID {
+				if typ == "source" {
+					edge.SourceID = nodeID
+				}
+				if typ == "target" {
+					edge.TargetID = nodeID
+				}
+			}
+		}
+	}
+}
+func (s *archGraphService) genArchGraphInfo(ctx context.Context, graphID int64) ([]*result.NodeInfo, []*result.EdgeInfo, error) {
+	record, err := s.archGraphRepo.GetByID(ctx, graphID)
+	if err != nil {
+		return nil, nil, err
+	}
+	nodeData := record.NodeData
+	edgeData := record.EdgeData
+	nodes := make([]*Node, 0, 0)
+	err = json.Unmarshal(nodeData, &nodes)
+	if err != nil {
+		return nil, nil, err
+	}
+	edges := make([]*Edge, 0, 0)
+	err = json.Unmarshal(edgeData, &edges)
+	if err != nil {
+		return nil, nil, err
+	}
+	nodeInfos := make([]*result.NodeInfo, 0, len(nodes))
+	for _, node := range nodes {
+		// 在这里判断 节点只有 text 而 没有 selected
+		nodeInfo := &result.NodeInfo{}
+		nodeInfo.ID = node.ID
+		nodeInfo.Type = node.Type
+		nodeInfo.Name = node.Text.Value
+		nodeInfos = append(nodeInfos, nodeInfo)
+	}
+	edgeInfos := make([]*result.EdgeInfo, 0, len(edges))
+	for _, edge := range edges {
+		edgeInfo := &result.EdgeInfo{}
+		edgeInfo.ID = edge.ID
+		edgeInfo.SourceID = edge.SourceNodeId
+		edgeInfo.TargetID = edge.TargetNodeId
+		edgeInfos = append(edgeInfos, edgeInfo)
+	}
+	return nodeInfos, edgeInfos, nil
+}
+
+func (s *archGraphService) genArchGraphNodes(edge *Edge, archGraphNodes []*ArchGraphNode) {
+	edgeID := edge.ID
+	sourceID := edge.SourceNodeId
+	targetID := edge.TargetNodeId
+	for _, archGraphNode := range archGraphNodes {
+		if archGraphNode.ID == sourceID {
+			nextNodeIDs := archGraphNode.NextNodeIDs
+			nextNodeIDs = append(nextNodeIDs, targetID)
+			nextEdgeIDs := archGraphNode.NextEdgeIDs
+			nextEdgeIDs = append(nextEdgeIDs, edgeID)
+			archGraphNode.NextNodeIDs = nextNodeIDs
+			archGraphNode.NextEdgeIDs = nextEdgeIDs
+		}
+		if archGraphNode.ID == targetID {
+			prevNodeIDs := archGraphNode.PrevNodeIDs
+			prevNodeIDs = append(prevNodeIDs, sourceID)
+			prevEdgeIDs := archGraphNode.PrevEdgeIDs
+			prevEdgeIDs = append(prevEdgeIDs, edgeID)
+			archGraphNode.PrevNodeIDs = prevNodeIDs
+			archGraphNode.PrevEdgeIDs = prevEdgeIDs
+		}
+	}
+}
+
+func (s *archGraphService) findStartAndEndNodes(nodes []*result.NodeInfo, edges []*result.EdgeInfo) ([]*result.NodeInfo, []*result.NodeInfo) {
+	startNodes := make([]*result.NodeInfo, 0, 0)
+	endNodes := make([]*result.NodeInfo, 0, 0)
+	nodeMap := make(map[string]*result.NodeInfo)
+	for _, node := range nodes {
+		nodeMap[node.ID] = node
+	}
+
+	// 记录所有 source 和 target
+	sources := make(map[string]bool)
+	targets := make(map[string]bool)
+
+	for _, edge := range edges {
+		sources[edge.SourceID] = true
+		targets[edge.TargetID] = true
+	}
+	// 起始节点: 出现在 sources 中，但不在 targets 中
+	for id := range sources {
+		if !targets[id] {
+			if node, ok := nodeMap[id]; ok {
+				startNodes = append(startNodes, node)
+			}
+		}
+	}
+	// 结束节点: 出现在 targets 中，但不在 sources 中
+	for id := range targets {
+		if !sources[id] {
+			if node, ok := nodeMap[id]; ok {
+				endNodes = append(endNodes, node)
+			}
+		}
+	}
+	return startNodes, endNodes
 }

@@ -24,4 +24,6 @@ type ArchGraphService interface {
 	GetReviewList(context.Context, *request.GetArchGraphReviewReq) (*result.ArchGraphReviewResult, error)
 	CreateReview(context.Context, *request.CreateArchGraphReviewReq) error
 	DeleteReview(context.Context, int64) error
+
+	GetDataByLabel(context.Context, *request.GetArchGraphDataReq) (*result.ArchGraphData, error)
 }

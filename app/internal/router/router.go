@@ -40,6 +40,7 @@ func NewRouter() *gin.Engine {
 
 	// openapi
 	openAuth := openapiV1.NewAuth()
+	openArchGraph := openapiV1.NewArchGraph()
 
 	openapiGroup := r.Group("/cattle/openapi/v1")
 	openapiPublicGroup := r.Group("/cattle/openapi/v1")
@@ -161,6 +162,7 @@ func NewRouter() *gin.Engine {
 	// open api
 	{
 		openapiPublicGroup.GET("/auth/token", openAuth.GetToken)
+		openapiPublicGroup.GET("/process-graph/info", openArchGraph.GetGraphData)
 
 	}
 	return r
