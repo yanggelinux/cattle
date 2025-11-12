@@ -1,8 +1,8 @@
 create
-database cattle DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+database if not exists cattle DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 
 
-CREATE TABLE `test`
+CREATE TABLE IF NOT EXISTS `test`
 (
     `id`           bigint(20)  NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `name`         varchar(50) NOT NULL DEFAULT '' COMMENT '名称',
@@ -20,7 +20,7 @@ CREATE TABLE `test`
 
 
 -- 用户权限相关
-CREATE TABLE `user`
+CREATE TABLE IF NOT EXISTS `user`
 (
     `id`              bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `user_name`       varchar(50)  NOT NULL DEFAULT '' COMMENT '用户名',
@@ -42,7 +42,7 @@ CREATE TABLE `user`
   DEFAULT CHARSET = utf8mb4 COMMENT = '用户表';
 
 
-CREATE TABLE `role`
+CREATE TABLE IF NOT EXISTS `role`
 (
     `id`           bigint(20)  NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `role_name`    varchar(50) NOT NULL DEFAULT '' COMMENT '角色名',
@@ -59,7 +59,7 @@ CREATE TABLE `role`
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT = '角色表';
 
-CREATE TABLE `team`
+CREATE TABLE IF NOT EXISTS `team`
 (
     `id`           bigint(20)  NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `name`         varchar(50) NOT NULL DEFAULT '' COMMENT '团队名称',
@@ -78,7 +78,7 @@ CREATE TABLE `team`
 
 
 
-CREATE TABLE `user_role_rel`
+CREATE TABLE IF NOT EXISTS `user_role_rel`
 (
     `id`           bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `user_id`      bigint(20) NOT NULL COMMENT '角色',
@@ -92,7 +92,7 @@ CREATE TABLE `user_role_rel`
   DEFAULT CHARSET = utf8mb4 COMMENT ='用户角色关联表';
 
 -- 权限
-CREATE TABLE `permission`
+CREATE TABLE IF NOT EXISTS `permission`
 (
     `id`           bigint(20)  NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `parent_id`    bigint(20)  NOT NULL DEFAULT '0' COMMENT '父id',
@@ -117,7 +117,7 @@ CREATE TABLE `permission`
   DEFAULT CHARSET = utf8mb4 COMMENT = '权限表';
 
 
-CREATE TABLE `role_perm_rel`
+CREATE TABLE IF NOT EXISTS `role_perm_rel`
 (
     `id`           bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `role_id`      bigint(20) NOT NULL COMMENT '角色ID',
@@ -132,7 +132,7 @@ CREATE TABLE `role_perm_rel`
 
 -- 架构图相关
 -- 架构组
-CREATE TABLE `arch_group`
+CREATE TABLE IF NOT EXISTS `arch_group`
 (
     `id`           bigint(20)  NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `parent_id`    bigint(20)  NOT NULL DEFAULT '0' COMMENT '父id',
@@ -150,7 +150,7 @@ CREATE TABLE `arch_group`
   DEFAULT CHARSET = utf8mb4 COMMENT = '流程组表';
 
 -- 架构图
-CREATE TABLE `arch_graph`
+CREATE TABLE IF NOT EXISTS `arch_graph`
 (
     `id`           bigint(20)  NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `group_id`     bigint(20)  NOT NULL DEFAULT 0 COMMENT '图组id',
@@ -175,7 +175,7 @@ CREATE TABLE `arch_graph`
   DEFAULT CHARSET = utf8mb4 COMMENT = '架构图表';
 
 -- 架构图记录表 实现快照功能
-CREATE TABLE `arch_graph_record`
+CREATE TABLE IF NOT EXISTS `arch_graph_record`
 (
     `id`           bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `graph_id`     bigint(20) NOT NULL DEFAULT 0 COMMENT '图id',
@@ -191,7 +191,7 @@ CREATE TABLE `arch_graph_record`
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT = '架构图记录表';
 
-CREATE TABLE `arch_graph_review`
+CREATE TABLE IF NOT EXISTS `arch_graph_review`
 (
     `id`           bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `graph_id`     bigint(20) NOT NULL DEFAULT 0 COMMENT '图id',
@@ -207,7 +207,7 @@ CREATE TABLE `arch_graph_review`
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT = '架构图评审记录表';
 
-CREATE TABLE `process_order`
+CREATE TABLE IF NOT EXISTS `process_order`
 (
     `id`                 bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `graph_id`           bigint(20)   NOT NULL DEFAULT 0 COMMENT '图id',
@@ -241,7 +241,7 @@ CREATE TABLE `process_order`
   DEFAULT CHARSET = utf8mb4 COMMENT = '流程工单表';
 
 
-CREATE TABLE `process_arch`
+CREATE TABLE IF NOT EXISTS `process_arch`
 (
     `id`                 bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `image_hash`         varchar(100) NOT NULL DEFAULT '' COMMENT '存放图片的base64 hash值',
@@ -256,7 +256,7 @@ CREATE TABLE `process_arch`
   DEFAULT CHARSET = utf8mb4 COMMENT = '流程工单架构信息表';
 
 -- 审批表，记录了审批记录
-CREATE TABLE `process_approval`
+CREATE TABLE IF NOT EXISTS `process_approval`
 (
     `id`           bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `order_id`     bigint(20)  NOT NULL DEFAULT '0' COMMENT '工单id',
@@ -273,7 +273,7 @@ CREATE TABLE `process_approval`
   DEFAULT CHARSET = utf8mb4 COMMENT = '流程审批表';
 
 
-CREATE TABLE `process`
+CREATE TABLE IF NOT EXISTS `process`
 (
     `id`           bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `name`         varchar(50) NOT NULL DEFAULT '' COMMENT '流程名',
@@ -293,7 +293,7 @@ CREATE TABLE `process`
   DEFAULT CHARSET = utf8mb4 COMMENT = '流程表';
 
 
-CREATE TABLE `order`
+CREATE TABLE IF NOT EXISTS `order`
 (
     `id`           bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `name`         varchar(50) NOT NULL DEFAULT '' COMMENT '工单名',
@@ -318,7 +318,7 @@ CREATE TABLE `order`
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT = '工单表';
 
-CREATE TABLE `order_group`
+CREATE TABLE IF NOT EXISTS `order_group`
 (
     `id`           bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `name`         varchar(50) NOT NULL DEFAULT '' COMMENT '工单组名',
@@ -335,7 +335,7 @@ CREATE TABLE `order_group`
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT = '工单分组表';
 
-CREATE TABLE `order_field`
+CREATE TABLE IF NOT EXISTS `order_field`
 (
     `id`            bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `order_id`      bigint(20) NOT NULL DEFAULT '0' COMMENT '工单id',
@@ -367,7 +367,7 @@ CREATE TABLE `order_field`
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT = '工单字段表';
 
-CREATE TABLE `demand`
+CREATE TABLE IF NOT EXISTS `demand`
 (
     `id`             bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `name`           varchar(50)   NOT NULL DEFAULT '' COMMENT '需求名称',
@@ -392,7 +392,7 @@ CREATE TABLE `demand`
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT = '需求表';
 
-CREATE TABLE `demand_approval`
+CREATE TABLE IF NOT EXISTS `demand_approval`
 (
     `id`           bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `demand_id`    varchar(50)  NOT NULL DEFAULT '' COMMENT '需求id',
