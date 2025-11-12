@@ -57,7 +57,6 @@ import UserAPI, { type UserForm } from '@/api/userPerm/user'
 import { computed, onMounted, reactive, ref, toRefs, type PropType } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRoleStore } from '@/store/modules/role'
-import { encryptPassword } from '@/utils/crypto.ts'
 
 import { type AxiosResponse } from 'axios'
 defineOptions({
@@ -158,13 +157,6 @@ async function handleUpdate() {
 async function handleSubmit() {
   formRef.value?.validate(async (valid: boolean) => {
     if (!valid) return
-    const password = formData.password
-    // 进行加密操作
-    if (password) {
-      const { iv, cipher } = await encryptPassword(password)
-      const ePassowrd = `${iv}@${cipher}`
-      formData.password = ePassowrd
-    }
     if (action.value === 'update') {
       handleUpdate()
     } else {
