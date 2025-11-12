@@ -6,12 +6,12 @@
         <div class="login-content-top">
           <img class="image-logo" src="../../assets/logo.png" height="50px" width="50px" />
           <div class="top-title">
-            <span>运维管理平台</span>
+            <span>流程架构平台</span>
           </div>
         </div>
         <div class="login-content-main">
           <div class="desc-wrapper">
-            <span>运维管理平台&nbsp;最权威的运维管理</span>
+            <span>流程架构平台&nbsp;最权威的流程架构</span>
           </div>
           <el-form
             :model="loginForm"
