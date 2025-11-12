@@ -84,6 +84,8 @@ cattle/
 #### 后端环境
 推荐 Golang 1.22以上
 #### 初始化数据库
+##### 数据库信息
+MySQL 5.7+ 必须是5.7版本以上的MySQL  
 初始化SQL存放位置：/cattle/app/internal/store/model/sql.sql  
 执行其中的建库、建表和数据插入语句
 #### 后端启动命令
