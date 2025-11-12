@@ -4,7 +4,7 @@
 *vendor/
 .idea
 app/cmd/bin
-app/configs/config.yaml
+app/configs/config_dev.yaml
 .vscode/
 
 # Logs
