@@ -407,3 +407,10 @@ CREATE TABLE `demand_approval`
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8mb4 COMMENT = '需求评审记录表';
+
+--创建管理员角色
+insert into role values (1,'admin','管理员',1,0,'2025-01-01 00:00:00','2025-05-01 12:00:00','2025-05-01 12:00:00');
+--创建管理员用户
+insert into user values (1,'admin','12345678','admin@e-cattle.com','管理员','运维团队',0,'2025-01-01 00:00:00','2025-05-01 12:00:00','2025-05-01 12:00:00');
+--将管理员角色关联到管理员用户
+insert into user_role_rel values (1,1,1,'2025-05-01 12:00:00');

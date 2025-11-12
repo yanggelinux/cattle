@@ -72,5 +72,34 @@ o	该工单会根据预设的规则，自动流转至相关的架构师、技术
 
 所有架构和资源的变更均有记录，便于审计和问题回溯。
 
+## 代码结构
+##### 代码结构如下
+cattle/  
+├── app/   #后端代码  
+├── ui/    #前端代码  
+├── README.md #项目介绍 
+
+## 开发环境启动项目
+### 启动后端
+#### 后端环境
+推荐 Golang 1.22以上
+#### 初始化数据库
+初始化SQL存放位置：/cattle/app/internal/store/model/sql.sql  
+执行其中的建库、建表和数据插入语句
+#### 后端启动命令
+```shell
+cd /app
+go mod tidy
+go run ./cmd/cattle/cattle.go --config=./configs/config.yaml
+```
+### 启动前端
+### 前端环境
+推荐 Node 版本v20.1.0 以上
+#### 前端启动命令
+```shell
+npm install
+npm run dev
+```
+
 
 
