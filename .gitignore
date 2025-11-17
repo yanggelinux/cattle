@@ -6,6 +6,8 @@
 app/cmd/bin
 app/configs/config_dev.yaml
 .vscode/
+git.sh
+*git.sh
 
 # Logs
 *logs
